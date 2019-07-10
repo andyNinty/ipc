@@ -2,8 +2,10 @@ package com.example.ipc;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,6 +13,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,12 +34,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Button button = findViewById(R.id.button);
-        new OpenHelper(getApplicationContext());
+        DbOpenHelper helper = new DbOpenHelper(getApplicationContext());
+        helper.getWritableDatabase();
         Button btnBinder = findViewById(R.id.btn_binder);
         Button btnMessenger = findViewById(R.id.btn_messenger);
 
         textView = findViewById(R.id.textview);
 
+
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = resolver.query(BookProvider.BOOK_URI, null, null, null, null);
+
+        while (cursor.moveToNext()) {
+            Log.e("------", cursor.getInt(0) + "");
+            Log.e("-----", cursor.getString(1));
+        }
+
+        cursor.close();
         // 使用aidl文件
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unbindService(mMessengerConnection);
-        unbindService(mServiceConnection);
+//        unbindService(mMessengerConnection);
+//        unbindService(mServiceConnection);
         super.onDestroy();
     }
 }
